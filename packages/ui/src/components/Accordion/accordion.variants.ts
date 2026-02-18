@@ -1,7 +1,7 @@
 import { cva } from "class-variance-authority";
 
 export const accordionVariants = cva(
-  "w-full divide-y divide-neutral-200 border border-neutral-200 rounded-md",
+  "w-full divide-y divide-neutral-200 border border-neutral-200 rounded-lg",
   {
     variants: {},
     defaultVariants: {},

@@ -76,7 +76,7 @@ describe("Toast", () => {
   it("applies variant classes", () => {
     const { rerender } = render(<Toast title="Test" variant="info" />);
     const alert = screen.getByRole("alert");
-    expect(alert.className).toContain("border-l-primary-500");
+    expect(alert.className).toContain("border-l-info-500");
 
     rerender(<Toast title="Test" variant="success" />);
     expect(screen.getByRole("alert").className).toContain("border-l-success-500");

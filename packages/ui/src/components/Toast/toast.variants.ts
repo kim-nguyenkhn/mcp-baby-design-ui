@@ -9,7 +9,7 @@ export const toastVariants = cva(
   {
     variants: {
       variant: {
-        info: "border-l-4 border-l-primary-500",
+        info: "border-l-4 border-l-info-500",
         success: "border-l-4 border-l-success-500",
         warning: "border-l-4 border-l-warning-500",
         error: "border-l-4 border-l-error-500",
@@ -24,7 +24,7 @@ export const toastVariants = cva(
 export const toastIconVariants = cva("shrink-0 mt-0.5", {
   variants: {
     variant: {
-      info: "text-primary-500",
+      info: "text-info-500",
       success: "text-success-500",
       warning: "text-warning-500",
       error: "text-error-500",

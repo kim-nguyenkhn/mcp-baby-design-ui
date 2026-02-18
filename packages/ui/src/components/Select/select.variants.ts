@@ -2,7 +2,7 @@ import { cva } from "class-variance-authority";
 
 export const selectTriggerVariants = cva(
   [
-    "flex w-full items-center justify-between rounded-md border bg-white px-3 py-2 text-sm",
+    "flex w-full items-center justify-between rounded-lg border bg-white px-3 py-2 text-sm",
     "transition-colors placeholder:text-neutral-400",
     "focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500",
     "disabled:cursor-not-allowed disabled:bg-neutral-100 disabled:opacity-50",
@@ -27,7 +27,7 @@ export const selectTriggerVariants = cva(
 
 export const selectDropdownVariants = cva(
   [
-    "absolute z-50 mt-1 w-full rounded-md border border-neutral-200 bg-white shadow-lg",
+    "absolute z-50 mt-1 w-full rounded-lg border border-neutral-200 bg-white shadow-lg",
     "max-h-60 overflow-auto",
   ],
 );

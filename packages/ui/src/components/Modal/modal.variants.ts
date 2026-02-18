@@ -10,7 +10,7 @@ export const modalOverlayVariants = cva(
 
 export const modalContentVariants = cva(
   [
-    "relative flex flex-col bg-white rounded-lg shadow-xl",
+    "relative flex flex-col bg-white rounded-xl shadow-xl",
     "max-h-[90vh] overflow-hidden",
     "animate-in fade-in-0 zoom-in-95 duration-200",
   ],

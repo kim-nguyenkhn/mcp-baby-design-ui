@@ -2,7 +2,7 @@ import { cva } from "class-variance-authority";
 
 export const datePickerInputVariants = cva(
   [
-    "flex w-full items-center justify-between rounded-md border bg-white px-3 py-2 text-sm",
+    "flex w-full items-center justify-between rounded-lg border bg-white px-3 py-2 text-sm",
     "transition-colors",
     "focus-within:outline-none focus-within:ring-2 focus-within:ring-primary-500 focus-within:border-primary-500",
     "disabled:cursor-not-allowed disabled:bg-neutral-100 disabled:opacity-50",
@@ -21,7 +21,7 @@ export const datePickerInputVariants = cva(
 );
 
 export const datePickerCalendarVariants = cva(
-  "absolute z-50 mt-1 rounded-md border border-neutral-200 bg-white p-4 shadow-lg",
+  "absolute z-50 mt-1 rounded-lg border border-neutral-200 bg-white p-4 shadow-lg",
 );
 
 export const datePickerDayCellVariants = cva(

@@ -2,7 +2,7 @@ import { cva } from "class-variance-authority";
 
 export const inputVariants = cva(
   [
-    "w-full rounded-md border bg-white px-3 py-2 text-sm text-neutral-800",
+    "w-full rounded-lg border bg-white px-3 py-2 text-sm text-neutral-800",
     "transition-colors placeholder:text-neutral-400",
     "focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500",
     "disabled:cursor-not-allowed disabled:bg-neutral-100 disabled:opacity-50",

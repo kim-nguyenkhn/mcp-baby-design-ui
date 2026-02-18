@@ -10,7 +10,7 @@ export const paginationVariants = cva(
 
 export const paginationItemVariants = cva(
   [
-    "inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors",
+    "inline-flex items-center justify-center rounded-lg text-sm font-medium transition-colors",
     "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2",
     "disabled:pointer-events-none disabled:opacity-50",
     "min-w-[36px] h-9 px-2",
