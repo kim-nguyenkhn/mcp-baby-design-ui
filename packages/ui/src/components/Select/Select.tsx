@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useId, useCallback } from "react";
+import React, { useState, useRef, useEffect, useId, useCallback, useMemo } from "react";
 import { cn } from "../../lib/utils";
 import { ChevronDown, Check, X, Search } from "../Icons";
 import {
@@ -64,11 +64,19 @@ export const Select = React.forwardRef<HTMLDivElement, SelectProps>(
     const hasError = Boolean(error);
 
     // Normalize value to array for internal use
-    const selectedValues: string[] = multiple
-      ? (Array.isArray(value) ? value : value ? [value] : [])
-      : value
-        ? [String(value)]
-        : [];
+    const selectedValues: string[] = useMemo(
+      () =>
+        multiple
+          ? (Array.isArray(value) ? value : value ? [value] : [])
+          : value
+            ? [String(value)]
+            : [],
+      [multiple, value],
+    );
+
+    // Keep a ref to the latest selectedValues to avoid stale closures
+    const selectedValuesRef = useRef(selectedValues);
+    selectedValuesRef.current = selectedValues;
 
     const filteredOptions = searchQuery
       ? options.filter((opt) =>
@@ -90,9 +98,10 @@ export const Select = React.forwardRef<HTMLDivElement, SelectProps>(
     const handleSelect = useCallback(
       (optionValue: string) => {
         if (multiple) {
-          const newValues = selectedValues.includes(optionValue)
-            ? selectedValues.filter((v) => v !== optionValue)
-            : [...selectedValues, optionValue];
+          const current = selectedValuesRef.current;
+          const newValues = current.includes(optionValue)
+            ? current.filter((v) => v !== optionValue)
+            : [...current, optionValue];
           onChange?.(newValues);
         } else {
           onChange?.(optionValue);
@@ -100,7 +109,7 @@ export const Select = React.forwardRef<HTMLDivElement, SelectProps>(
         }
         setSearchQuery("");
       },
-      [multiple, selectedValues, onChange],
+      [multiple, onChange],
     );
 
     const handleRemoveTag = (optionValue: string, e: React.MouseEvent) => {

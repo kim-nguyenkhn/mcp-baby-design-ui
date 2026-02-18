@@ -111,7 +111,7 @@ export const Modal = React.forwardRef<HTMLDivElement, ModalProps>(
       [onClose],
     );
 
-    if (!open) return null;
+    if (!open || typeof document === "undefined") return null;
 
     return createPortal(
       <div

@@ -87,7 +87,6 @@ export const Checkbox = React.forwardRef<HTMLButtonElement, CheckboxProps>(
           <label
             htmlFor={id}
             className={cn(checkboxLabelVariants({ disabled }))}
-            onClick={handleClick}
           >
             {label}
           </label>

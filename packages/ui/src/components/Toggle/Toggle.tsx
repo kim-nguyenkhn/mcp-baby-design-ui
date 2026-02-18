@@ -68,7 +68,6 @@ export const Toggle = React.forwardRef<HTMLButtonElement, ToggleProps>(
           <label
             htmlFor={id}
             className={cn(toggleLabelVariants({ disabled }))}
-            onClick={disabled ? undefined : handleClick}
           >
             {label}
           </label>

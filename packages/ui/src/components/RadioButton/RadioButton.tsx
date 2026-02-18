@@ -133,7 +133,6 @@ export const RadioButton = React.forwardRef<HTMLButtonElement, RadioButtonProps>
           <label
             htmlFor={id}
             className={cn(radioLabelVariants({ disabled }))}
-            onClick={disabled ? undefined : handleClick}
           >
             {label}
           </label>

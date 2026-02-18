@@ -28,7 +28,7 @@ export const Tooltip = React.forwardRef<HTMLDivElement, TooltipProps>(
     const tooltipId = useId();
 
     const calculatePosition = useCallback(() => {
-      if (!triggerRef.current) return;
+      if (!triggerRef.current || typeof window === "undefined") return;
 
       const rect = triggerRef.current.getBoundingClientRect();
       const scrollX = window.scrollX;
@@ -116,15 +116,35 @@ export const Tooltip = React.forwardRef<HTMLDivElement, TooltipProps>(
     })();
 
     const triggerChild = React.cloneElement(children, {
-      ref: triggerRef,
-      onMouseEnter: show,
-      onMouseLeave: hide,
-      onFocus: show,
-      onBlur: hide,
+      ref: (node: HTMLElement | null) => {
+        (triggerRef as React.MutableRefObject<HTMLElement | null>).current = node;
+        const childRef = (children as React.ReactElement & { ref?: React.Ref<HTMLElement> }).ref;
+        if (typeof childRef === "function") {
+          childRef(node);
+        } else if (childRef && typeof childRef === "object") {
+          (childRef as React.MutableRefObject<HTMLElement | null>).current = node;
+        }
+      },
+      onMouseEnter: (e: React.MouseEvent) => {
+        children.props.onMouseEnter?.(e);
+        show();
+      },
+      onMouseLeave: (e: React.MouseEvent) => {
+        children.props.onMouseLeave?.(e);
+        hide();
+      },
+      onFocus: (e: React.FocusEvent) => {
+        children.props.onFocus?.(e);
+        show();
+      },
+      onBlur: (e: React.FocusEvent) => {
+        children.props.onBlur?.(e);
+        hide();
+      },
       "aria-describedby": visible ? tooltipId : undefined,
     });
 
-    const tooltipElement = visible
+    const tooltipElement = visible && typeof document !== "undefined"
       ? createPortal(
           <div
             ref={ref}

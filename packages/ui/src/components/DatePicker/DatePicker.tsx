@@ -86,8 +86,11 @@ export const DatePicker = React.forwardRef<HTMLDivElement, DatePickerProps>(
     const [viewYear, setViewYear] = useState(
       value ? value.getFullYear() : today.getFullYear(),
     );
+    const [focusedDay, setFocusedDay] = useState<number | null>(null);
     const containerRef = useRef<HTMLDivElement>(null);
+    const gridRef = useRef<HTMLDivElement>(null);
     const generatedId = useId();
+    const triggerId = `${generatedId}-trigger`;
 
     const isDateDisabled = useCallback(
       (date: Date): boolean => {
@@ -131,13 +134,119 @@ export const DatePicker = React.forwardRef<HTMLDivElement, DatePickerProps>(
     const handleToggle = () => {
       if (disabled) return;
       setIsOpen((prev) => {
-        if (!prev && value) {
-          setViewMonth(value.getMonth());
-          setViewYear(value.getFullYear());
+        if (!prev) {
+          if (value) {
+            setViewMonth(value.getMonth());
+            setViewYear(value.getFullYear());
+          }
+          // Focus the selected day, or today, or the 1st
+          const initialDay = value ? value.getDate() : (
+            (!value && viewMonth === today.getMonth() && viewYear === today.getFullYear())
+              ? today.getDate()
+              : 1
+          );
+          setFocusedDay(initialDay);
+        } else {
+          setFocusedDay(null);
         }
         return !prev;
       });
     };
+
+    const handleGridKeyDown = (e: React.KeyboardEvent) => {
+      if (!focusedDay) return;
+      const daysCount = getDaysInMonth(viewYear, viewMonth);
+      let newDay = focusedDay;
+      let monthChanged = false;
+
+      switch (e.key) {
+        case "ArrowRight":
+          e.preventDefault();
+          if (focusedDay >= daysCount) {
+            handleNextMonth();
+            newDay = 1;
+            monthChanged = true;
+          } else {
+            newDay = focusedDay + 1;
+          }
+          break;
+        case "ArrowLeft":
+          e.preventDefault();
+          if (focusedDay <= 1) {
+            handlePrevMonth();
+            const prevDays = getDaysInMonth(
+              viewMonth === 0 ? viewYear - 1 : viewYear,
+              viewMonth === 0 ? 11 : viewMonth - 1,
+            );
+            newDay = prevDays;
+            monthChanged = true;
+          } else {
+            newDay = focusedDay - 1;
+          }
+          break;
+        case "ArrowDown":
+          e.preventDefault();
+          if (focusedDay + 7 > daysCount) {
+            handleNextMonth();
+            newDay = (focusedDay + 7) - daysCount;
+            monthChanged = true;
+          } else {
+            newDay = focusedDay + 7;
+          }
+          break;
+        case "ArrowUp":
+          e.preventDefault();
+          if (focusedDay - 7 < 1) {
+            handlePrevMonth();
+            const prevDays = getDaysInMonth(
+              viewMonth === 0 ? viewYear - 1 : viewYear,
+              viewMonth === 0 ? 11 : viewMonth - 1,
+            );
+            newDay = prevDays + (focusedDay - 7);
+            monthChanged = true;
+          } else {
+            newDay = focusedDay - 7;
+          }
+          break;
+        case "Home":
+          e.preventDefault();
+          newDay = 1;
+          break;
+        case "End":
+          e.preventDefault();
+          newDay = daysCount;
+          break;
+        case "Enter":
+        case " ":
+          e.preventDefault();
+          {
+            const selectedDate = new Date(viewYear, viewMonth, focusedDay);
+            if (!isDateDisabled(selectedDate)) {
+              handleSelectDate(selectedDate);
+            }
+          }
+          return;
+        case "Escape":
+          e.preventDefault();
+          setIsOpen(false);
+          setFocusedDay(null);
+          return;
+        default:
+          return;
+      }
+
+      setFocusedDay(newDay);
+    };
+
+    // Focus the active day cell when focusedDay changes
+    useEffect(() => {
+      if (isOpen && focusedDay && gridRef.current) {
+        const cell = gridRef.current.querySelector<HTMLElement>(
+          `[data-day="${focusedDay}"]`,
+        );
+        cell?.focus();
+      }
+    }, [isOpen, focusedDay, viewMonth, viewYear]);
 
     // Close on outside click
     useEffect(() => {
@@ -200,11 +309,12 @@ export const DatePicker = React.forwardRef<HTMLDivElement, DatePickerProps>(
     return (
       <div ref={ref} className={cn("flex flex-col gap-1.5 w-full", className)}>
         {label && (
-          <label className={cn(datePickerLabelVariants())}>{label}</label>
+          <label htmlFor={triggerId} className={cn(datePickerLabelVariants())}>{label}</label>
         )}
         <div ref={containerRef} className="relative">
           <button
             type="button"
+            id={triggerId}
             onClick={handleToggle}
             disabled={disabled}
             className={cn(datePickerInputVariants({ hasError: false }))}
@@ -254,50 +364,62 @@ export const DatePicker = React.forwardRef<HTMLDivElement, DatePickerProps>(
                 </button>
               </div>
 
-              {/* Day headers */}
-              <div className="grid grid-cols-7 gap-0 mb-1" role="grid">
-                {DAYS.map((day) => (
-                  <div
-                    key={day}
-                    className="flex h-8 w-8 items-center justify-center text-xs font-medium text-neutral-500"
-                  >
-                    {day}
+              {/* Day grid */}
+              <div ref={gridRef} role="grid" aria-label="Calendar dates" onKeyDown={handleGridKeyDown}>
+                {/* Column headers */}
+                <div role="row" className="grid grid-cols-7 gap-0 mb-1">
+                  {DAYS.map((day) => (
+                    <div
+                      key={day}
+                      role="columnheader"
+                      className="flex h-8 w-8 items-center justify-center text-xs font-medium text-neutral-500"
+                    >
+                      {day}
+                    </div>
+                  ))}
+                </div>
+
+                {/* Day rows (7 days per row) */}
+                {Array.from({ length: Math.ceil(calendarDays.length / 7) }, (_, rowIndex) => (
+                  <div key={rowIndex} role="row" className="grid grid-cols-7 gap-0">
+                    {calendarDays.slice(rowIndex * 7, rowIndex * 7 + 7).map(({ date, isCurrentMonth }, cellIndex) => {
+                      const isDayDisabled = isDateDisabled(date);
+                      const isDaySelected = value ? isSameDay(date, value) : false;
+                      const isDayToday = isSameDay(date, today);
+                      const isFocused = isCurrentMonth && focusedDay === date.getDate();
+
+                      return (
+                        <div
+                          key={rowIndex * 7 + cellIndex}
+                          role="gridcell"
+                          aria-selected={isDaySelected || undefined}
+                          aria-disabled={isDayDisabled || undefined}
+                          tabIndex={isFocused ? 0 : -1}
+                          data-day={isCurrentMonth ? date.getDate() : undefined}
+                          onClick={() =>
+                            !isDayDisabled && isCurrentMonth && handleSelectDate(date)
+                          }
+                          className={cn(
+                            datePickerDayCellVariants({
+                              isSelected: isDaySelected,
+                              isToday: isDayToday && !isDaySelected,
+                              isDisabled: isDayDisabled,
+                              isOutsideMonth: !isCurrentMonth,
+                            }),
+                            isFocused && "ring-2 ring-primary-500 ring-offset-1",
+                          )}
+                          data-testid={
+                            isCurrentMonth
+                              ? `datepicker-day-${date.getDate()}`
+                              : undefined
+                          }
+                        >
+                          {date.getDate()}
+                        </div>
+                      );
+                    })}
                   </div>
                 ))}
-
-                {/* Day cells */}
-                {calendarDays.map(({ date, isCurrentMonth }, index) => {
-                  const isDayDisabled = isDateDisabled(date);
-                  const isDaySelected = value ? isSameDay(date, value) : false;
-                  const isDayToday = isSameDay(date, today);
-
-                  return (
-                    <div
-                      key={index}
-                      role="gridcell"
-                      aria-selected={isDaySelected || undefined}
-                      aria-disabled={isDayDisabled || undefined}
-                      onClick={() =>
-                        !isDayDisabled && isCurrentMonth && handleSelectDate(date)
-                      }
-                      className={cn(
-                        datePickerDayCellVariants({
-                          isSelected: isDaySelected,
-                          isToday: isDayToday && !isDaySelected,
-                          isDisabled: isDayDisabled,
-                          isOutsideMonth: !isCurrentMonth,
-                        }),
-                      )}
-                      data-testid={
-                        isCurrentMonth
-                          ? `datepicker-day-${date.getDate()}`
-                          : undefined
-                      }
-                    >
-                      {date.getDate()}
-                    </div>
-                  );
-                })}
               </div>
             </div>
           )}

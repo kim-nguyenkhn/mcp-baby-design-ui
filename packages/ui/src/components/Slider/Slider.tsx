@@ -1,4 +1,4 @@
-import React, { useRef, useCallback, useEffect, useState } from "react";
+import React, { useRef, useCallback, useState } from "react";
 import { cn } from "../../lib/utils";
 import {
   sliderContainerVariants,
@@ -82,6 +82,17 @@ export const Slider = React.forwardRef<HTMLDivElement, SliderProps>(
         e.preventDefault();
         isDragging.current = true;
         updateValue(e.clientX);
+
+        const handleMouseMove = (ev: MouseEvent) => {
+          updateValue(ev.clientX);
+        };
+        const handleMouseUp = () => {
+          isDragging.current = false;
+          document.removeEventListener("mousemove", handleMouseMove);
+          document.removeEventListener("mouseup", handleMouseUp);
+        };
+        document.addEventListener("mousemove", handleMouseMove);
+        document.addEventListener("mouseup", handleMouseUp);
       },
       [disabled, updateValue],
     );
@@ -91,43 +102,20 @@ export const Slider = React.forwardRef<HTMLDivElement, SliderProps>(
         if (disabled) return;
         isDragging.current = true;
         updateValue(e.touches[0].clientX);
+
+        const handleTouchMove = (ev: TouchEvent) => {
+          updateValue(ev.touches[0].clientX);
+        };
+        const handleTouchEnd = () => {
+          isDragging.current = false;
+          document.removeEventListener("touchmove", handleTouchMove);
+          document.removeEventListener("touchend", handleTouchEnd);
+        };
+        document.addEventListener("touchmove", handleTouchMove);
+        document.addEventListener("touchend", handleTouchEnd);
       },
       [disabled, updateValue],
     );
-
-    useEffect(() => {
-      const handleMouseMove = (e: MouseEvent) => {
-        if (isDragging.current) {
-          updateValue(e.clientX);
-        }
-      };
-
-      const handleMouseUp = () => {
-        isDragging.current = false;
-      };
-
-      const handleTouchMove = (e: TouchEvent) => {
-        if (isDragging.current) {
-          updateValue(e.touches[0].clientX);
-        }
-      };
-
-      const handleTouchEnd = () => {
-        isDragging.current = false;
-      };
-
-      document.addEventListener("mousemove", handleMouseMove);
-      document.addEventListener("mouseup", handleMouseUp);
-      document.addEventListener("touchmove", handleTouchMove);
-      document.addEventListener("touchend", handleTouchEnd);
-
-      return () => {
-        document.removeEventListener("mousemove", handleMouseMove);
-        document.removeEventListener("mouseup", handleMouseUp);
-        document.removeEventListener("touchmove", handleTouchMove);
-        document.removeEventListener("touchend", handleTouchEnd);
-      };
-    }, [updateValue]);
 
     const handleKeyDown = (e: React.KeyboardEvent) => {
       if (disabled) return;
