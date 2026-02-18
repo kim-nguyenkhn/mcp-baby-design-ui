@@ -1,6 +1,12 @@
 # Baby Design UI Kit
 
-A pastel-themed React component library with an MCP server for AI-assisted development. Inspired by the "Baby Design UI Kit" by Trang Tran.
+A pastel-themed React component library with an MCP server for AI-assisted development.
+
+> **Design Credit:** Based on the [Baby Design UI Kit](https://trangtran.design) by [Trang Tran](https://trangtran.design). All visual design, color palettes, typography choices, and component specifications originate from her work.
+
+![Component Showcase](assets/components-showcase.png)
+
+![Storybook Preview](assets/storybook-preview.png)
 
 ## Packages
 
@@ -139,6 +145,10 @@ pnpm storybook
 - @modelcontextprotocol/sdk for MCP server
 - Storybook for component docs
 - Vitest + React Testing Library for tests
+
+## Credits
+
+Design by [Trang Tran](https://trangtran.design) — [Baby Design UI Kit](https://trangtran.design).
 
 ## License
 
